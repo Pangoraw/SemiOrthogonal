@@ -5,6 +5,7 @@ The code from this file comes from:
     * https://github.com/taikiinoue45/PaDiM
 """
 from typing import List
+from statistics import mean
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -94,7 +95,7 @@ def compute_pro_score(amaps: NDArray, masks: NDArray) -> float:
 
         df = df.append({"pro": mean(pros), "fpr": fpr, "threshold": th}, ignore_index=True)
 
-    df.to_csv("pro_curve.csv", index=False)
+    # df.to_csv("pro_curve.csv", index=False)
     return auc(df["fpr"], df["pro"])
 
 
