@@ -26,9 +26,9 @@ Here are the metrics compared to the one from the paper, with WideResNet50 as a 
 
 |Category|Paper (PRO Score)|This implementation (PRO Score)|
 |-|-|-|
-|Carpet|.974|0.971|
+|Carpet|.974|.971|
 |Grid|.941|XXX|
-|Leather|.987|0.997|
+|Leather|.987|.997|
 |Tile|.859|.932|
 |Wood|.906|.969|
 |Bottle|.962|.988|
