@@ -139,7 +139,7 @@ class SemiOrthogonal:
             imgs: Tensor - (b * W * H) tensor of images
         Returns
         =======
-            distances: Tensor - (c * b) array of distances
+            distances: Tensor - (1, w, h) array of distances
         """
         means, inv_cvars = self.real_means, self.covs_inv
         if means is None or inv_cvars is None:

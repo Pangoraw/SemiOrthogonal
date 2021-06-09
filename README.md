@@ -87,7 +87,7 @@ dataloader = DataLoader(...)
 # Use semi_ortho.train(...)
 semi_ortho.train(dataloader)
 
-# Or PaDiM.train_one_batch(...)
+# Or SemiOrthogonal.train_one_batch(...)
 for imgs in dataloader:
 	semi_ortho.train_one_batch(imgs)
 semi_ortho.finalize_training() # compute the approx of C^-1
@@ -98,9 +98,10 @@ With the same `SemiOrthogonal` instance as in the [Training](#training) section:
 
 ```python
 for new_imgs in test_dataloader:
-	distances = semi_ortho.predict(new_imgs) 
-	# distances is a (n * c) matrix of the mahalanobis distances
-	# Compute metrics...
+	distances = semi_ortho.predict(new_imgs)
+	# Note: predict only supports one image batches for now ;)
+	# distances is a (1, w, h) matrix of the mahalanobis distances
+	# Compute metrics or plot the anomaly map...
 ```
 
 ### References
