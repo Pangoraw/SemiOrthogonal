@@ -2,6 +2,9 @@
 ##### _Semi-orthogonal Embedding for Efficient Unsupervised Anomaly Segmentation_
 ---
 
+![Example with the toothbrush dataset](https://user-images.githubusercontent.com/9824244/121331688-691ef780-c917-11eb-927d-677914acbaf5.png)
+
+
 This is an **unofficial** re-implementation of the paper *Semi-orthogonal Embedding for Efficient Unsupervised Anomaly Segmentation* [1] available on [arxiv](http://arxiv.org/abs/2105.14737). This paper proposes a modification on the PaDiM [2] method, mainly to replace the random dimension selection with an optimized inverse covariance computation using a semi-orthogonal embedding.
 
 ### Features
