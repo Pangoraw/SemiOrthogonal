@@ -11,7 +11,7 @@ from semi_orthogonal.backbones import ResNet18, WideResNet50
 
 
 def _generate_W(F: int, k: int, device: str):
-    omega = torch.randn((k, F), device=device)
+    omega = torch.randn((F, k), device=device)
     q, r = torch.linalg.qr(omega)
     W = q @ torch.sign(torch.diag(torch.diag(r)))
     return W
@@ -28,7 +28,7 @@ class SemiOrthogonal:
         self.num_embeddings = self.max_embeddings_size
         self.real_means, self.covs_inv = None, None
         self.k = k
-        self.W = _generate_W(self.k, self.num_embeddings, device) 
+        self.W = _generate_W(self.num_embeddings, self.k, device) 
 
         self.means = torch.zeros(
             (self.num_patches, self.k)).to(self.device)
