@@ -1,13 +1,13 @@
-from abc import abstractmethod
 from typing import Union, Tuple
 
 import torch
 from torch import Tensor, device as Device
 from torch.utils.data import DataLoader
+from numpy import array as NDArray
 
 from semi_orthogonal.utils import embeddings_concat
 from semi_orthogonal.utils.distance import mahalanobis_sq
-from semi_orthogonal.backbones import ResNet18, WideResNet50
+from semi_orthogonal.backbones import ResNet18, ResNet50, WideResNet50
 
 
 def _generate_W(F: int, k: int, device: str):
@@ -28,12 +28,11 @@ class SemiOrthogonal:
         self.num_embeddings = self.max_embeddings_size
         self.real_means, self.covs_inv = None, None
         self.k = k
-        self.W = _generate_W(self.num_embeddings, self.k, device) 
+        self.W = _generate_W(self.num_embeddings, self.k, device)
 
-        self.means = torch.zeros(
-            (self.num_patches, self.k)).to(self.device)
-        self.covs = torch.zeros((self.num_patches, self.k,
-                                 self.k)).to(self.device)
+        self.means = torch.zeros((self.num_patches, self.k)).to(self.device)
+        self.covs = torch.zeros(
+            (self.num_patches, self.k, self.k)).to(self.device)
         self.N = 0
 
     def _get_backbone(self):
@@ -50,6 +49,8 @@ class SemiOrthogonal:
                                  size: Tuple[int, int]) -> None:
         if backbone == "resnet18":
             self.model = ResNet18().to(self.device)
+        elif backbone == "resnet50":
+            self.model = ResNet50().to(self.device)
         elif backbone == "wide_resnet50":
             self.model = WideResNet50().to(self.device)
         else:
@@ -89,14 +90,14 @@ class SemiOrthogonal:
                 patch_embeddings = embeddings[i, :, :]  # k * b
                 for j in range(b):
                     self.covs[i, :, :] += torch.outer(
-                        patch_embeddings[:, j],
-                        patch_embeddings[:, j])  # c * c
+                        patch_embeddings[:, j], patch_embeddings[:,
+                                                                 j])  # c * c
                 self.means[i, :] += patch_embeddings.sum(dim=1)  # c
             self.N += b  # number of images
 
     def finalize_training(self):
         "compute the approx of C^-1"
-        means, C = self._get_params()
+        means, C = self.get_params()
         # free memory
         self.means = None
         self.covs = None
@@ -105,8 +106,8 @@ class SemiOrthogonal:
         self.covs_inv = covs_inv
         self.real_means = means
 
-    def _get_params(self,
-                   epsilon: float = 0.01) -> Tuple[Tensor, Tensor, Tensor]:
+    def get_params(self,
+                    epsilon: float = 0.01) -> Tuple[Tensor, Tensor, Tensor]:
         """
         Computes the mean vectors and covariance matrices from the
         intermediary state
@@ -152,3 +153,25 @@ class SemiOrthogonal:
         distances = mahalanobis_sq(embeddings, means, inv_cvars)
         # TODO: handle more than 1 image
         return torch.sqrt(distances).view(1, w, h)
+
+    def get_residuals(self):
+        backbone = self._get_backbone()
+
+        def detach_numpy(t: Tensor) -> NDArray:
+            return t.detach().cpu().numpy()
+
+        return (self.N, detach_numpy(self.means), detach_numpy(self.covs),
+                detach_numpy(self.W), backbone)
+
+    @staticmethod
+    def from_residuals(N: int, means: NDArray, covs: NDArray,
+                       embedding_ids: NDArray, backbone: str,
+                       device: Union[Device, str]):
+        _, k = W.shape
+        semi_ortho = SemiOrthogonal(k, device=device, backbone=backbone)
+        semi_ortho.W = torch.tensor(W, device=device)
+        semi_ortho.N = N
+        semi_ortho.means = torch.tensor(means, device=device)
+        semi_ortho.covs = torch.tensor(covs, device=device)
+
+        return semi_ortho
