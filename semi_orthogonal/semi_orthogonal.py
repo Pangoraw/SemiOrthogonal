@@ -57,6 +57,7 @@ class SemiOrthogonal:
             raise Exception(f"unknown backbone {backbone}, "
                             "choose one of ['resnet18', 'wide_resnet50']")
 
+        self.model.eval()
         empty_batch = torch.zeros((1, 3) + size, device=self.device)
         feature_1, _, _ = self.model(empty_batch)
         _, _, w, h = feature_1.shape
@@ -65,9 +66,9 @@ class SemiOrthogonal:
         self.num_patches = num_patches
         self.max_embeddings_size = self.model.embeddings_size
 
-    def _embed_batch(self, imgs: Tensor, with_grad: bool = False) -> Tensor:
-        with torch.set_grad_enabled(with_grad):
-            feature_1, feature_2, feature_3 = self.model(imgs.to(self.device))
+    @torch.no_grad()
+    def _embed_batch(self, imgs: Tensor) -> Tensor:
+        feature_1, feature_2, feature_3 = self.model(imgs.to(self.device))
         embeddings = embeddings_concat(feature_1, feature_2)
         embeddings = embeddings_concat(embeddings, feature_3)
         embeddings = embeddings.permute(2, 3, 1, 0)
