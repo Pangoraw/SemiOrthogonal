@@ -87,13 +87,8 @@ class SemiOrthogonal:
             b = embeddings.size(3)
             embeddings = embeddings.reshape(
                 (self.num_patches, self.k, -1))  # (w * h) * k * b
-            for i in range(self.num_patches):
-                patch_embeddings = embeddings[i, :, :]  # k * b
-                for j in range(b):
-                    self.covs[i, :, :] += torch.outer(
-                        patch_embeddings[:, j], patch_embeddings[:,
-                                                                 j])  # c * c
-                self.means[i, :] += patch_embeddings.sum(dim=1)  # c
+            self.covs += torch.einsum("wib,wjb->wij", embeddings, embeddings)
+            self.means += torch.einsum("wib->wi", embeddings)
             self.N += b  # number of images
 
     def finalize_training(self):

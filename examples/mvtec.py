@@ -20,7 +20,7 @@ from semi_orthogonal import SemiOrthogonal
 from semi_orthogonal.utils import compute_pro_score
 
 parser = argparse.ArgumentParser("SemiOrthogonal test on MVTEC")
-parser.add_argument("--data_root")
+parser.add_argument("--data_root", required=True)
 parser.add_argument("--backbone", default="resnet18", choices=["resnet18", "wide_resnet50"])
 parser.add_argument("--size", default="256x256")
 parser.add_argument("-k", type=int, default=100)
