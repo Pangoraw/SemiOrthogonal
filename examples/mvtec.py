@@ -23,17 +23,19 @@ parser = argparse.ArgumentParser("SemiOrthogonal test on MVTEC")
 parser.add_argument("--data_root", required=True)
 parser.add_argument("--backbone", default="resnet18", choices=["resnet18", "wide_resnet50"])
 parser.add_argument("--size", default="256x256")
+parser.add_argument("--center_crop", type=int, default=224)
 parser.add_argument("-k", type=int, default=100)
 args = parser.parse_args()
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 size = tuple(map(int, args.size.split("x")))
 semi_orthogonal = SemiOrthogonal(
-    k=args.k, device=device, backbone=args.backbone, size=size)
+    k=args.k, device=device, backbone=args.backbone, size=(224,224))
 
 img_transforms = transforms.Compose([
+    transforms.Resize(size, Image.ANTIALIAS),
+    transforms.CenterCrop(args.center_crop),
     transforms.ToTensor(),
-    transforms.Resize(size),
     transforms.Normalize(
         mean=[0.485, 0.456, 0.406],
         std=[0.229, 0.224, 0.225],
@@ -92,8 +94,9 @@ test_dataset = MVTecADTestDataset(
     root=args.data_root,
     transform=img_transforms,
     mask_transform=transforms.Compose([
+        transforms.Resize(size, Image.NEAREST),
+        transforms.CenterCrop(args.center_crop),
         transforms.ToTensor(),
-        transforms.Resize(size)
     ]),
 )
 
@@ -131,7 +134,7 @@ for i, (img, mask, label) in tqdm(enumerate(limited_generator), total=n_test_ima
 gaussian_smoothing = transforms.GaussianBlur(9)
 
 amaps = torch.cat(amaps)
-amaps = F.interpolate(amaps, size, mode="bilinear", align_corners=True)
+amaps = F.interpolate(amaps, (args.center_crop, args.center_crop), mode="bilinear", align_corners=True)
 amaps = gaussian_smoothing(amaps)
 amaps -= amaps.min()
 amaps /= amaps.max()
