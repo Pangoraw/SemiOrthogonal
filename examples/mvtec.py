@@ -71,6 +71,7 @@ class MVTecADTestDataset(Dataset):
         mask_file = item_file.replace(".png", "_mask.png")
         mask_file = path.join(self.ground_truth_dir, mask_file)
         img = Image.open(img_file)
+        img = img.convert("RGB")
         img = self.transform(img)
 
         is_good_img = self.classes[self.current_class] == "good"

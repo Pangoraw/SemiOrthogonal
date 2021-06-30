@@ -25,12 +25,12 @@ git clone https://github.com/Pangoraw/SemiOrthogonal.git
 
 #### MVTec AD
 
-Here are the metrics compared to the one from the paper, with WideResNet50 as a backbone and `k=300`:
+Here are the metrics compared to the one from the paper (with only one run), with WideResNet50 as a backbone and `k=300`:
 
 |Category|Paper (PRO Score)|This implementation (PRO Score)|
 |-|-|-|
 |Carpet|.974|.971|
-|Grid|.941|XXX|
+|Grid|.941|.972|
 |Leather|.987|.997|
 |Tile|.859|.932|
 |Wood|.906|.969|
@@ -40,11 +40,11 @@ Here are the metrics compared to the one from the paper, with WideResNet50 as a 
 |Hazelnut|.970|.985|
 |Metal nut|.930|.976|
 |Pill|.936|.982|
-|Screw|.953|XXX|
+|Screw|.953|.984|
 |Toothbrush|.957|.985|
 |Transistor|.929|.969|
-|Zipper|.960|XXX|
-|**Mean**|.942|XXX|
+|Zipper|.960|.985|
+|**Mean**|.942|.975|
 
 To reproduce the results on the MVTec AD dataset, download the files.
 
