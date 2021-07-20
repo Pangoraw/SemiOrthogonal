@@ -42,8 +42,7 @@ img_transforms = transforms.Compose([
 ])
 
 train_dataset = ImageFolder(root=args.data_root + "/train",
-    transform=img_transforms,
-    target_transform=lambda x: 1)
+    transform=img_transforms)
 
 class MVTecADTestDataset(Dataset):
     def __init__(self, root, transform, mask_transform):
