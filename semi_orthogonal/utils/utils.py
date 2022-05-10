@@ -69,7 +69,7 @@ def compute_roc_score(amaps: NDArray, y_trues: NDArray, stems: List[str]) -> flo
 
 def compute_pro_score(amaps: NDArray, masks: NDArray) -> float:
 
-    df = pd.DataFrame([], columns=["pro", "fpr", "threshold"])
+    datas = []
     binary_amaps = np.zeros_like(amaps, dtype=np.bool)
 
     max_step = 200
@@ -93,8 +93,9 @@ def compute_pro_score(amaps: NDArray, masks: NDArray) -> float:
         FP_pixels = np.logical_and(inverse_masks, binary_amaps).sum()
         fpr = FP_pixels / inverse_masks.sum()
 
-        df = df.append({"pro": mean(pros), "fpr": fpr, "threshold": th}, ignore_index=True)
+        datas.append({"pro": mean(pros), "fpr": fpr, "threshold": th})
 
+    df = pd.DataFrame(datas)
     # df.to_csv("pro_curve.csv", index=False)
     return auc(df["fpr"], df["pro"])
 

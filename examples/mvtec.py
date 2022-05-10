@@ -24,6 +24,7 @@ parser.add_argument("--data_root", required=True)
 parser.add_argument("--backbone", default="resnet18", choices=["resnet18", "wide_resnet50"])
 parser.add_argument("--size", default="256x256")
 parser.add_argument("-k", type=int, default=100)
+parser.add_argument("--checkpoint_file", default=None, type=str, help="Store training file and load from it")
 args = parser.parse_args()
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -107,6 +108,15 @@ print(">> Training")
 for imgs, _ in tqdm(train_dataloader):
     imgs = imgs.to(device)
     semi_orthogonal.train_one_batch(imgs)
+
+# Example of saving and loading the SemiOrthogonal data
+if args.checkpoint_file is not None:
+    residuals = semi_orthogonal.get_residuals()
+    torch.save(residuals, args.checkpoint_file)
+
+    residuals = torch.load(args.checkpoint_file)
+    semi_orthogonal = SemiOrthogonal.from_residuals(*residuals, device=device)
+
 semi_orthogonal.finalize_training()
 
 n_test_images = len(test_dataset)

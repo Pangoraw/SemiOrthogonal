@@ -3,7 +3,7 @@ from typing import Union, Tuple
 import torch
 from torch import Tensor, device as Device
 from torch.utils.data import DataLoader
-from numpy import array as NDArray
+from numpy import ndarray as NDArray
 
 from semi_orthogonal.utils import embeddings_concat
 from semi_orthogonal.utils.distance import mahalanobis_sq
@@ -88,7 +88,7 @@ class SemiOrthogonal:
             embeddings = embeddings.reshape(
                 (self.num_patches, self.k, -1))  # (w * h) * k * b
             self.covs += torch.einsum("wib,wjb->wij", embeddings, embeddings)
-            self.means += torch.einsum("wib->wi", embeddings)
+            self.means += embeddings.sum(-1)
             self.N += b  # number of images
 
     def finalize_training(self):
@@ -103,7 +103,7 @@ class SemiOrthogonal:
         self.real_means = means
 
     def get_params(self,
-                    epsilon: float = 0.01) -> Tuple[Tensor, Tensor, Tensor]:
+                    epsilon: float = 0.01) -> Tuple[Tensor, Tensor]:
         """
         Computes the mean vectors and covariance matrices from the
         intermediary state
@@ -161,7 +161,7 @@ class SemiOrthogonal:
 
     @staticmethod
     def from_residuals(N: int, means: NDArray, covs: NDArray,
-                       embedding_ids: NDArray, backbone: str,
+                       W: NDArray, backbone: str,
                        device: Union[Device, str]):
         _, k = W.shape
         semi_ortho = SemiOrthogonal(k, device=device, backbone=backbone)
